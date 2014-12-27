@@ -1,4 +1,4 @@
-spotify
+Spotify API
 =======
 
 Local spotify API - Find out what track's playing.
