@@ -54,6 +54,8 @@
     <Compile Include="Track.cs" />
     <Compile Include="Timestamp.cs" />
     <Compile Include="Responses\TrackInfo.cs" />
+    <Compile Include="TrackList.cs" />
+    <Compile Include="TracksListPart.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
