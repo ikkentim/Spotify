@@ -153,10 +153,7 @@ namespace SpotifyAPI
             Update();
 
             if (timer == null)
-                timer = new Timer(callbackState =>
-                {
-                    Update().Wait();
-                }, this, 0, interval);
+                timer = new Timer(callbackState => Update().Wait(), this, 0, interval);
         }
 
         /// <summary>
@@ -172,7 +169,6 @@ namespace SpotifyAPI
         /// </summary>
         public async Task Update()
         {
-            Console.Write("u");
             // If not running, but known to be available, notify.
             if ((!IsRunning || !IsHelperRunning) && IsAvailable)
             {
