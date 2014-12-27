@@ -17,17 +17,30 @@ using Newtonsoft.Json;
 
 namespace SpotifyAPI
 {
+    /// <summary>
+    ///     Represents a resource.
+    /// </summary>
+    /// <typeparam name="T">The base resource of the resource.</typeparam>
     public abstract class ResourcePromise<T> where T : ResourcePromise<T>.BaseResource
     {
-        protected T PartialResource;
-        private T _info;
+        protected T PartialResource; // Contains partial resource information
+        private T _info; // Contains full resource information
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ResourcePromise`1" /> class.
+        /// </summary>
+        /// <param name="name">The name of the resource.</param>
+        /// <param name="uri">The uri of the resource.</param>
         protected ResourcePromise(string name, string uri)
         {
             Name = name;
             URI = uri;
         }
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ResourcePromise`1" /> class.
+        /// </summary>
+        /// <param name="partialResource">The partial resource of this resource.</param>
         protected ResourcePromise(T partialResource)
         {
             PartialResource = partialResource;
@@ -35,20 +48,35 @@ namespace SpotifyAPI
             URI = partialResource.URI;
         }
 
+        /// <summary>
+        ///     Gets the name of this resource.
+        /// </summary>
         public string Name { get; private set; }
 
+        /// <summary>
+        ///     Gets the URI of this resource.
+        /// </summary>
         public string URI { get; private set; }
 
+        /// <summary>
+        ///     Gets the url to show this resource in a browser.
+        /// </summary>
         public string OpenURL
         {
             get { return string.Format(@"http://open.spotify.com/{0}/{1}", Type, Identifier); }
         }
 
+        /// <summary>
+        ///     Gets the identifier of this resource.
+        /// </summary>
         public string Identifier
         {
             get { return URI.Split(':').LastOrDefault(); }
         }
 
+        /// <summary>
+        ///     Gets the type of this resource.
+        /// </summary>
         public string Type
         {
             get { return URI.Split(':').FirstOrDefault(part => part != "spotify"); }
@@ -82,11 +110,21 @@ namespace SpotifyAPI
             }
         }
 
+        /// <summary>
+        ///     Returns a string that represents the current object.
+        /// </summary>
+        /// <returns>
+        ///     A string that represents the current object.
+        /// </returns>
+        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return Name;
         }
 
+        /// <summary>
+        ///     Represents the json resource as provided by the API.
+        /// </summary>
         public abstract class BaseResource
         {
             [JsonProperty("href")]

@@ -32,22 +32,4 @@ namespace SpotifyAPI.Responses
         [JsonProperty("track_type")]
         public string TrackType { get; set; }
     }
-
-    internal class TrackResource
-    {
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("uri")]
-        public string URI { get; set; }
-
-        [JsonProperty("location")]
-        public TrackResourceLocation Location { get; set; }
-    }
-
-    internal class TrackResourceLocation
-    {
-        [JsonProperty("og")]
-        public string Og { get; set; }
-    }
 }

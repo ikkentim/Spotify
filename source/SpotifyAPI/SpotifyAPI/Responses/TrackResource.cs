@@ -11,22 +11,16 @@
 // 
 // For more information, please refer to <http://unlicense.org>
 
-using System;
+using Newtonsoft.Json;
 
-namespace SpotifyAPI
+namespace SpotifyAPI.Responses
 {
-    /// <summary>
-    ///     Contains methods for generation timestamps
-    /// </summary>
-    internal static class Timestamp
+    internal class TrackResource
     {
-        /// <summary>
-        ///     Generates a timestamp.
-        /// </summary>
-        /// <returns>Timestamp in seconds.</returns>
-        public static int Generate()
-        {
-            return Convert.ToInt32((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
-        }
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("uri")]
+        public string URI { get; set; }
     }
 }

@@ -18,11 +18,24 @@ using System.Linq;
 
 namespace SpotifyAPI
 {
+    /// <summary>
+    ///     Represents an album's track list.
+    /// </summary>
     public class TrackList : IEnumerable<Track>
     {
-        private readonly List<TracksListPart> _parts = new List<TracksListPart>();
+        #region Fields
 
-        internal TrackList(TracksListPart first)
+        private readonly List<TrackListPart> _parts = new List<TrackListPart>(); //Cache of all parts
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TrackList" />.
+        /// </summary>
+        /// <param name="first">The first part of the list.</param>
+        internal TrackList(TrackListPart first)
         {
             while (first.Offset != 0)
             {
@@ -32,24 +45,38 @@ namespace SpotifyAPI
             _parts.Insert(0, first);
         }
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        ///     Gets the number of tracks in this <see cref="TrackList" />.
+        /// </summary>
         public int Count
         {
             get { return _parts.First().Total; }
         }
 
+        /// <summary>
+        ///     Gets the <see cref="Track" /> at a given index in this <see cref="TrackList" />.
+        /// </summary>
+        /// <param name="index">The index of which to get the <see cref="Track" />.</param>
+        /// <returns>The <see cref="Track" /> at the given <paramref name="index" />.</returns>
         public Track this[int index]
         {
             get
             {
+                // Bounds check
                 if (index < 0 || index >= Count) throw new IndexOutOfRangeException();
 
-                TracksListPart part =
+                // Looking in cached parts
+                TrackListPart part =
                     _parts.FirstOrDefault(p => p.Offset <= index && p.Offset + p.Tracks.Count() > index);
 
                 if (part != null) return part.Tracks.ElementAt(index - part.Offset);
 
-
-                TracksListPart current = _parts.Last();
+                // Fetch parts untill we have the right part
+                TrackListPart current = _parts.Last();
                 while (current.Offset + current.Tracks.Count() < index)
                 {
                     current = current.Next;
@@ -60,15 +87,35 @@ namespace SpotifyAPI
             }
         }
 
+        #endregion
+
+        #region IEnumerable<Track> implementation
+
+        /// <summary>
+        ///     Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>
+        ///     A <see cref="T:System.Collections.Generic.IEnumerator`1" /> that can be used to iterate through the collection.
+        /// </returns>
+        /// <filterpriority>1</filterpriority>
         public IEnumerator<Track> GetEnumerator()
         {
             for (int index = 0; index < Count; index++)
                 yield return this[index];
         }
 
+        /// <summary>
+        ///     Returns an enumerator that iterates through a collection.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
+        /// </returns>
+        /// <filterpriority>2</filterpriority>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
+
+        #endregion
     }
 }

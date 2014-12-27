@@ -16,28 +16,49 @@ using Newtonsoft.Json;
 
 namespace SpotifyAPI
 {
+    /// <summary>
+    ///     Represents an artist.
+    /// </summary>
     public class Artist : ResourcePromise<Artist.Resource>
     {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Artist" /> class.
+        /// </summary>
+        /// <param name="name">The name of the artist.</param>
+        /// <param name="uri">The uri of the artist.</param>
         internal Artist(string name, string uri)
             : base(name, uri)
         {
         }
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Artist" /> class.
+        /// </summary>
+        /// <param name="partialResource">The partial resource of the artist.</param>
         internal Artist(Resource partialResource)
             : base(partialResource)
         {
         }
 
+        /// <summary>
+        ///     Gets a collection of genres of this <see cref="Artist" />.
+        /// </summary>
         public IEnumerable<string> Genres
         {
             get { return this["Genres"].Genres; }
         }
 
+        /// <summary>
+        ///     Gets a collection of images of this <see cref="Artist" />.
+        /// </summary>
         public IEnumerable<ImageResource> Images
         {
             get { return this["Images"].Images; }
         }
 
+        /// <summary>
+        ///     Represents the json resource as provided by the API.
+        /// </summary>
         public class Resource : BaseResource
         {
             [JsonProperty("genres")]
