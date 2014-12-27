@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 
 namespace SpotifyAPI
 {
-    public class TracksListPart : ResourcePromise<TracksListPart.Resource>
+    internal class TracksListPart : ResourcePromise<TracksListPart.Resource>
     {
         private readonly Album _album;
         private TracksListPart _next;

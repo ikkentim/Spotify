@@ -22,7 +22,7 @@ namespace SpotifyAPI
     {
         private readonly List<TracksListPart> _parts = new List<TracksListPart>();
 
-        public TrackList(TracksListPart first)
+        internal TrackList(TracksListPart first)
         {
             while (first.Offset != 0)
             {

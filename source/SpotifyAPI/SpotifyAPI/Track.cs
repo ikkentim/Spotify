@@ -21,19 +21,21 @@ namespace SpotifyAPI
     {
         private Artist _artist;
 
-        public Track(string name, string uri, int length, Artist artist, Album album) : base(name, uri)
+        internal Track(string name, string uri, int length, Artist artist, Album album)
+            : base(name, uri)
         {
             Length = length*1000;
             Artist = artist;
             Album = album;
         }
 
-        public Track(Resource partialResource) : base(partialResource)
+        internal Track(Resource partialResource)
+            : base(partialResource)
         {
             Length = this["Duration"].Duration;
         }
 
-        public Track(Resource partialResource, Album album)
+        internal Track(Resource partialResource, Album album)
             : this(partialResource)
         {
             Album = album;

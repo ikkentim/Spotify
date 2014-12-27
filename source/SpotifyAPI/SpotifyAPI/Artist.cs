@@ -18,11 +18,12 @@ namespace SpotifyAPI
 {
     public class Artist : ResourcePromise<Artist.Resource>
     {
-        public Artist(string name, string uri) : base(name, uri)
+        internal Artist(string name, string uri)
+            : base(name, uri)
         {
         }
 
-        public Artist(Resource partialResource)
+        internal Artist(Resource partialResource)
             : base(partialResource)
         {
         }

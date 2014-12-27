@@ -19,11 +19,11 @@ namespace SpotifyAPI
 {
     public class Album : ResourcePromise<Album.Resource>
     {
-        public Album(string name, string uri) : base(name, uri)
+        internal Album(string name, string uri) : base(name, uri)
         {
         }
 
-        public Album(Resource partialResource)
+        internal Album(Resource partialResource)
             : base(partialResource)
         {
         }
