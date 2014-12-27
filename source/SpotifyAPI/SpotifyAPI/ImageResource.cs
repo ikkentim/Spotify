@@ -17,7 +17,7 @@ namespace SpotifyAPI
 {
     public class ImageResource
     {
-        internal ImageResource(int width, int height, string url)
+        public ImageResource(int width, int height, string url)
         {
             Width = width;
             Height = height;
