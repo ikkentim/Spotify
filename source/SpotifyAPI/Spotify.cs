@@ -14,8 +14,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SpotifyAPI.Responses;
 
@@ -28,15 +29,13 @@ namespace SpotifyAPI
     {
         #region Fields
 
-        private readonly WebClient _webClient; // web client used for fetching tokens and status.
-        private bool _autoUpdate; // contains auto update toggle.
-        private int _autoUpdateInterval = 1000; // contains auto update rate.
         private string _csrfToken; // contains csrf token.
         private Track _currentTrack; // contains current track.
         private bool _lastPlaying; // contains last playing state.
         private double _lastPlayingTime; // contains last playing time.
         private double _lastVolume; // contains last volume.
         private string _oauthToken; // contains oauth token.
+        private Timer timer; // contains a timer responsible for automatically updating the status.
 
         #endregion
 
@@ -48,11 +47,7 @@ namespace SpotifyAPI
             // Ensure helper is running
             RunHelper();
 
-            _webClient = new WebClient();
-            _webClient.Headers.Add("Origin", "https://embed.spotify.com");
-
-            // Setup and fetch initial update
-            Update();
+            Update().Wait();
         }
 
         /// <summary>
@@ -115,37 +110,6 @@ namespace SpotifyAPI
         public double Volume { get; private set; }
 
         /// <summary>
-        ///     Gets or sets whether <see cref="Update" /> should be called automatically at an interval.
-        /// </summary>
-        /// <remarks>
-        ///     The interval can be set with <see cref="AutoUpdateInterval" />
-        /// </remarks>
-        public bool AutoUpdate
-        {
-            get { return _autoUpdate; }
-            set
-            {
-                if (value == _autoUpdate) return;
-                _autoUpdate = value;
-
-                if (value) DoAutoUpdate();
-            }
-        }
-
-        /// <summary>
-        ///     Gets or sets the update interval.
-        /// </summary>
-        public int AutoUpdateInterval
-        {
-            get { return _autoUpdateInterval; }
-            set
-            {
-                if (_autoUpdateInterval < 50) throw new ArgumentOutOfRangeException("Must be 50 or greater");
-                _autoUpdateInterval = value;
-            }
-        }
-
-        /// <summary>
         ///     Fired once <see cref="CurrentTrack" /> changes.
         /// </summary>
         public event EventHandler TrackChanged;
@@ -170,25 +134,45 @@ namespace SpotifyAPI
         /// </summary>
         public event EventHandler AvailabilityChanged;
 
-        private void Boot()
+        private async Task Boot()
         {
             // Fetch tokens.
-            _csrfToken = GetCFIDToken();
-            _oauthToken = GetOAuthToken();
+            Task<string> csrf = GetCFIDToken();
+            Task<string> oauth = GetOAuthToken();
+
+            _csrfToken = await csrf;
+            _oauthToken = await oauth;
         }
 
-        private async void DoAutoUpdate()
+        /// <summary>
+        ///     Automatically call the <see cref="Update" /> method.
+        /// </summary>
+        /// <param name="interval">Interval in MS in which to update.</param>
+        public void AutoUpdate(int interval)
         {
-            // Keep updating.
-            while (AutoUpdate)
-            {
-                Update();
-                Thread.Sleep(AutoUpdateInterval);
-            }
+            Update();
+
+            if (timer == null)
+                timer = new Timer(callbackState =>
+                {
+                    Update().Wait();
+                }, this, 0, interval);
         }
 
-        public void Update()
+        /// <summary>
+        ///     Stops automatically calling the <see cref="Update" /> method.
+        /// </summary>
+        public void StopAutoUpdate()
         {
+            if (timer != null) timer.Dispose();
+        }
+
+        /// <summary>
+        ///     Updates the known state.
+        /// </summary>
+        public async Task Update()
+        {
+            Console.Write("u");
             // If not running, but known to be available, notify.
             if ((!IsRunning || !IsHelperRunning) && IsAvailable)
             {
@@ -206,7 +190,7 @@ namespace SpotifyAPI
                 if (AvailabilityChanged != null)
                     AvailabilityChanged(this, EventArgs.Empty);
 
-                Boot();
+                await Boot();
             }
 
             // If running but helper is not running, boot and skip update.
@@ -223,7 +207,7 @@ namespace SpotifyAPI
             }
 
             // Fetch status, store and update.
-            StatusResponse status = QueryStatus();
+            StatusResponse status = await QueryStatus();
 
             if (_currentTrack == null || _currentTrack.URI != status.TrackInfo.TrackResource.URI)
             {
@@ -316,9 +300,9 @@ namespace SpotifyAPI
 
         #region Tokens
 
-        internal string GetCFIDToken()
+        internal async Task<string> GetCFIDToken()
         {
-            string raw = Query("simplecsrf/token.json", false, false).Replace(@"\", "");
+            string raw = (await Query("simplecsrf/token.json", false, false)).Replace(@"\", "");
 
             var response = JsonConvert.DeserializeObject<CFIDResponse>(raw);
 
@@ -328,12 +312,12 @@ namespace SpotifyAPI
             return response.Token;
         }
 
-        internal string GetOAuthToken()
+        internal async Task<string> GetOAuthToken()
         {
             string raw;
-            using (var wc = new WebClient())
+            using (var wc = new HttpClient())
             {
-                raw = wc.DownloadString("http://open.spotify.com/token");
+                raw = await wc.GetStringAsync("http://open.spotify.com/token");
             }
 
             var response = JsonConvert.DeserializeObject<Dictionary<String, object>>(raw);
@@ -344,16 +328,16 @@ namespace SpotifyAPI
 
         #region Queries
 
-        internal StatusResponse QueryStatus()
+        internal async Task<StatusResponse> QueryStatus()
         {
-            string response = Query("remote/status.json", true, true);
+            string response = await Query("remote/status.json", true, true);
 
             if (string.IsNullOrEmpty(response)) return null;
 
             return JsonConvert.DeserializeObject<StatusResponse>(response);
         }
 
-        internal string Query(string request, bool oauth, bool cfid)
+        internal async Task<string> Query(string request, bool oauth, bool cfid)
         {
             string parameters = "?ref=&cors=&_=" + Timestamp.Generate();
 
@@ -363,7 +347,12 @@ namespace SpotifyAPI
 
             string a = @"http://localhost:4380/" + request + parameters;
 
-            return _webClient.DownloadString(a).Replace("\\n", string.Empty);
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Add("Origin", "https://embed.spotify.com");
+
+                return (await httpClient.GetStringAsync(a)).Replace("\\n", string.Empty);
+            }
         }
 
         #endregion

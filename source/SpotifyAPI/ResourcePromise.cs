@@ -12,7 +12,7 @@
 // For more information, please refer to <http://unlicense.org>
 
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using Newtonsoft.Json;
 
 namespace SpotifyAPI
@@ -88,10 +88,9 @@ namespace SpotifyAPI
             {
                 if (_info != null) return _info;
 
-                using (var webClient = new WebClient())
+                using (var httpClient = new HttpClient())
                 {
-                    string raw =
-                        webClient.DownloadString(string.Format("https://api.spotify.com/v1/{0}s/{1}", Type, Identifier));
+                    string raw =httpClient.GetAsync(string.Format("https://api.spotify.com/v1/{0}s/{1}", Type, Identifier)).Result.Content.ReadAsStringAsync().Result.Replace("\\n", string.Empty);
                     return _info = JsonConvert.DeserializeObject<T>(raw);
                 }
             }
