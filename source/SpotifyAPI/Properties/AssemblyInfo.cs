@@ -22,10 +22,10 @@ using System.Resources;
 [assembly: AssemblyTitle("SpotifyAPI")]
 [assembly: AssemblyDescription("SpotifyAPI")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Tim Potze")]
 [assembly: AssemblyProduct("SpotifyAPI")]
-[assembly: AssemblyCopyright("Copyright © Tim Potze 2014")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("-")]
+[assembly: AssemblyTrademark("-")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
